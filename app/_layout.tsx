@@ -14,7 +14,7 @@ export {
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(tabs)',
+  initialRouteName: 'ShotTracker',
 };
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -50,8 +50,8 @@ function RootLayoutNav() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="ShotTracker" options={{ headerShown: true }} />
+        <Stack.Screen name="Scorecard"  options={{ presentation: 'modal' }} />
       </Stack>
     </ThemeProvider>
   );
