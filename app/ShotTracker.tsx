@@ -18,7 +18,7 @@ export default function SimpleCounter(){
     const [bad, setBad] = useState(0)
     const [putt, setPutt] = useState(0)
     const [totals, setTotals] = useState<number[]>([0,0,0,0])
-    const colors = ["skyblue","green","salmon","antiquewhite"]
+    const colors = ["skyblue","green","salmon","gold"]
     const setUpCourseAPI = async() => {
         setUpCourse(DominionMeadows);
     }
@@ -124,12 +124,14 @@ export default function SimpleCounter(){
     }
     const HolePieChart = () => {
         return(
-            <PieChart widthAndHeight={200} series={totals} sliceColor={colors} coverRadius={0.45} coverFill={
+            <PieChart widthAndHeight={200} series={totals} sliceColor={colors} 
+             coverRadius={0.45} coverFill={
                                                                                                              (DominionMeadows.strokes/DominionMeadows.holesPlayed) <= 4.2 ?'#555'
                                                                                                             :(DominionMeadows.strokes/DominionMeadows.holesPlayed) <= 4.5 ?'skyblue'
                                                                                                             :(DominionMeadows.strokes/DominionMeadows.holesPlayed) <= 5.5 ?'limegreen'
                                                                                                             :(DominionMeadows.strokes/DominionMeadows.holesPlayed) <= 6 ?'salmon' 
-                                                                                                            : 'red'}  />
+                                                                                                            :(DominionMeadows.holesPlayed==0) ? 'white'
+                                                                                                                                : 'red'}  />
         )
     }
     const BlankPieChart = () => {
@@ -138,7 +140,7 @@ export default function SimpleCounter(){
                                                                                                                                 :(DominionMeadows.strokes/DominionMeadows.holesPlayed) <= 4.5 ?'skyblue'
                                                                                                                                 :(DominionMeadows.strokes/DominionMeadows.holesPlayed) <= 5.5 ?'limegreen'
                                                                                                                                 :(DominionMeadows.strokes/DominionMeadows.holesPlayed) <= 6 ?'salmon' 
-                                                                                                                                :!(DominionMeadows.holesPlayed==0) ? 'white'
+                                                                                                                                :(DominionMeadows.holesPlayed==0) ? 'white'
                                                                                                                                 : 'red'}  />
     }
     // const OgHoleInfo = () => {
@@ -177,26 +179,40 @@ export default function SimpleCounter(){
             </View>
         )
     }
+
+    const circles = (str:string,num:number) => {
+        let circs = ''
+        for (let i =0; i < num; i++){
+            circs += str;
+        }
+        return circs;
+    }
+
     const ShotBtns = () => {
         return (
             <View style={{width:'100%'}}>    
-                <TouchableOpacity activeOpacity={0.6} style={styles.goodBtn} onPress={()=> setGood(good+1)} onLongPress={() => setGood(good == 0 ? 0 : good-1)} >
+                    <TouchableOpacity activeOpacity={0.6} style={styles.pureBtn} onPress={()=> setPure(pure+1)} onLongPress={() => setPure(pure == 0 ? 0 : pure-1)}>
+                        <Text style={styles.Text}>Pure</Text>
+                        <Text style={styles.Text}>{pure ? circles('*',pure) : ' '}</Text> 
+                    </TouchableOpacity>
+            <View style={{flexDirection:'row', justifyContent:"center",width: '100%', marginVertical: 5,}}>
+
+                <TouchableOpacity activeOpacity={0.6} style={styles.mid1} onPress={()=> setGood(good+1)} onLongPress={() => setGood(good == 0 ? 0 : good-1)} >
                     <Text style={styles.Text}>Good</Text> 
+                    <Text style={styles.Text}>{good ? circles('*',good) : ' '}</Text> 
                 </TouchableOpacity>
 
                 
-                <TouchableOpacity activeOpacity={0.6} style={styles.badBtn} onPress={()=> setBad(bad+1)} onLongPress={() => setBad(bad == 0 ? 0 : bad-1)} >
+                <TouchableOpacity activeOpacity={0.6} style={styles.mid2} onPress={()=> setBad(bad+1)} onLongPress={() => setBad(bad == 0 ? 0 : bad-1)} >
                     <Text style={styles.Text}>Bad</Text> 
+                    <Text style={styles.Text}>{bad ? circles('*',bad) : ' '}</Text> 
                 </TouchableOpacity>
 
-                <View style={{flexDirection:'row', justifyContent:"center", backgroundColor:'white',width: '100%', marginVertical: 5,}}>
-                    <TouchableOpacity activeOpacity={0.6} style={{width:'50%', backgroundColor:'skyblue',paddingVertical: 30,}} onPress={()=> setPure(pure+1)} onLongPress={() => setPure(pure == 0 ? 0 : pure-1)}>
-                        <Text style={styles.Text}>Pure</Text> 
-                    </TouchableOpacity>
-                    <TouchableOpacity activeOpacity={0.6} style={{width:'50%', backgroundColor:'tan',paddingVertical: 30,}} onPress={()=> setPutt(putt+1)} onLongPress={() => setPutt(putt == 0 ? 0 : putt-1)} >
-                        <Text style={styles.Text}>Putt</Text> 
-                    </TouchableOpacity> 
                 </View>
+                    <TouchableOpacity activeOpacity={0.6} style={styles.puttBtn} onPress={()=> setPutt(putt+1)} onLongPress={() => setPutt(putt == 0 ? 0 : putt-1)} >
+                        <Text style={styles.Text}>Putt</Text> 
+                        <Text style={styles.Text}>{putt ? circles('*',putt) : ' '}</Text> 
+                    </TouchableOpacity> 
             </View>
            
         )
@@ -209,14 +225,14 @@ export default function SimpleCounter(){
     return (
     <View style={styles.container}>
                     {/* <Stack.Screen options={{title:'Simple Counter', headerTransparent: true, headerBackTitle: 'Menu', headerTitleStyle:{color: 'whitesmoke'} }} /> */}
-                    <Stack.Screen options={{ title:`Hole ${holeNum}`, headerStyle:{backgroundColor:"#444"}, headerTitleStyle:{fontSize:20, fontWeight:'800'},
+                    <Stack.Screen options={{ title:`Hole ${holeNum}`, headerStyle:{backgroundColor:"#444"}, headerTitleStyle:{color:'whitesmoke',fontSize:30, fontWeight:'800'},
                     headerLeft: () => (
                     <Pressable
                         onPress={() =>
                         router.push('/Scorecard')
                         }
                     >
-                        <Text style={{ color: "gold", fontSize: 14, fontWeight: "bold" }}>
+                        <Text style={{ color: "gold", fontSize: 18, fontWeight: "bold" }}>
                         Scorecard
                         </Text>
                     </Pressable>
@@ -224,7 +240,7 @@ export default function SimpleCounter(){
                     ),
                     headerRight: () => (
                         <TouchableOpacity onPress={()=> saveAndReset()}>
-                            <Text style={{flex: 1,color: 'white', fontSize: 17, fontWeight:'bold', fontStyle:'italic'}}>Save {'>'}</Text>
+                            <Text style={{flex: 1,color: 'lightblue', fontSize: 19, fontWeight:'bold', fontStyle:'italic'}}>Next {'>'}</Text>
                         </TouchableOpacity>
                     ),}}/>
         
@@ -273,8 +289,8 @@ const styles = StyleSheet.create({
     pureBtn: {
         
         backgroundColor: 'skyblue',
-        paddingVertical: 30,
-        marginVertical: 5,
+        paddingTop: 15, 
+        
         width: '100%',
         
         
@@ -283,7 +299,7 @@ const styles = StyleSheet.create({
         
         backgroundColor: 'lightgreen',
         paddingVertical: 30,
-        marginVertical: 5,
+        
         width: '100%',
         
         
@@ -299,18 +315,18 @@ const styles = StyleSheet.create({
     },
     puttBtn: {
         
-        backgroundColor: 'tan',
-        paddingVertical: 30,
-        marginTop: 5,
+        backgroundColor: 'gold',
+        paddingTop: 15,
+        
         width: '100%',
-        marginBottom:80,
+       
         
         
     },
     Text: {
         textAlign: 'center',
         // color: 'white',
-        fontSize: 20,
+        fontSize: 30,
         fontStyle: 'italic',
         fontWeight: '600',
         
@@ -330,6 +346,13 @@ const styles = StyleSheet.create({
       padding: 5,
       width: 40
       
+    },
+    mid1 : {
+        width:'50%', backgroundColor:'limegreen',
+        paddingTop: 35, paddingBottom:5, marginRight:2.5
+    },
+    mid2 : {
+        width:'50%', backgroundColor:'salmon',paddingTop: 35, paddingBottom:5,marginLeft:2.5
     }
     
     
