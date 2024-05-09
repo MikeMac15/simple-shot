@@ -34,266 +34,202 @@ export const resetScorecard = async () => {
   } catch(e) {console.error(e)}
   console.log('removed.')
 }
-// export const setHoleData = async (holeArr: any, holeNum: number) => {
-//     try {
-//         const jsonValue = JSON.stringify(holeArr)
-//         await AsyncStorage.setItem(`Hole_${holeNum}`, jsonValue)
-//     } catch(e) {
-//         console.error(e)
-//     }
-//     console.log("Done.")
-// }
 
-// export const getHoleData = async (holeNum: number) => {
-//     try {
-//         const jsonValue = await AsyncStorage.getItem(`Hole_${holeNum}`)
-//         return jsonValue != null ? JSON.parse(jsonValue) : null
-//     } catch(e) {
-//         console.error(e)
-//     }
-//     console.log("Done.")
-// }
 
-// export const removeHoleData = async (holeNum:number) => {
-//     try{ await AsyncStorage.removeItem(`Hole_${holeNum}`)}
-//     catch(e) {console.error(e)}
-//     console.log('removed.')
-// }
+/////////////////////////////////////////////////// CLASSES ///////////////////////////////////////////////////
 
-// export const startUp18 = async () => {
-//     const initHoles = {}
-//     try {
-//         for (let i = 1; i <= 18; i++) {
-//             initHoles[`Hole_${i}`] = []
-//         }
-//         console.log(initHoles)
 
-//     } catch (e) {
+//???????///////?????????///// HARD CODE ROUND.ID FIX IT //////????????//////////????????/////???????/////????
+export class Round {
+  id : number = 1;
+  holesPlayed : number = 0;
+  holes : {[num:number]:HoleStats} = {};
+  putts : number = 0; // sum of this.holes.hole.putts
+  pures : number = 0; // sum of this.holes.hole.pure
+  goods : number = 0; // sum of this.holes.hole.good
+  bads : number = 0; //  sum of this.holes.hole.bad
+  toPar : number = 0;
+  toPar3 : number = 0; // sum of this.holes.hole.toPar where this.holes.hole.par == 3
+  toPar4 : number = 0; // sum of this.holes.hole.toPar where this.holes.hole.par == 4
+  toPar5 : number = 0; // sum of this.holes.hole.toPar where this.holes.hole.par == 5
+  GIRs : number = 0; // count() of this.holes.hole.gir == true
+  FIRs : number = 0; // count() of this.holes.hole.fir == true
+  totalStrokes : number = 0;
 
-//     }
-// }
+
+  addRoundHole(hole: Hole, gir: boolean, putts: number, pure: number, good: number, bad: number, fir?: boolean) {
+    const roundHole = new HoleStats(hole, putts, pure, good, bad, gir, fir);
+    this.holes[hole.num] = roundHole;
+
+    this.holesPlayed++;
+    // Update aggregated statistics based on the newly added RoundHole
+    this.putts += putts;
+    this.pures += pure;
+    this.goods += good;
+    this.bads += bad;
+    this.totalStrokes += (putts+pure+good+bad);
+    this.toPar += roundHole.toPar;
+    if (hole.par === 3) {
+        this.toPar3 += roundHole.toPar;
+    } else if (hole.par === 4) {
+        this.toPar4 += roundHole.toPar;
+    } else if (hole.par === 5) {
+        this.toPar5 += roundHole.toPar;
+    }
+    if (gir) {
+        this.GIRs++;
+    }
+    if (fir) {
+        this.FIRs++;
+    }
+}
+}
+
+
+export class HoleStats {
+  hole: Hole;
+  putts: number;
+  pure: number;
+  good: number;
+  bad : number;
+  gir : boolean;
+  fir?: boolean;
+  toPar: number;
+
+  constructor(
+    hole: Hole,
+    putts: number,
+    pure: number,
+    good: number,
+    bad : number,
+    gir : boolean,
+    fir?: boolean){
+      this.hole = hole;
+      this.putts = putts;
+      this.pure = pure;
+      this.good = good;
+      this.bad = bad;
+      this.gir = gir;
+      this.fir = fir;
+      this.toPar = (putts+pure+good+bad)-this.hole.par
+  }
+
+}
 
 export class Hole {
     num: number;
+    color: string;
     par: number;
     yardage: number;
-    wYardage: number;
-    putts: number;
-    pure: number;
-    good: number;
-    bad: number;
-    totalShots: number;
-    toPar: number;
-    played: boolean;
-    gir: boolean;
-    gotPar: boolean;
-    gotBogey: boolean;
-    gotBirdie: boolean;
-    gotEagle: boolean;
-    gotOverBogey: boolean;
-  
-    constructor(num:number,par:number,yardage:number,wYardage:number) {
-      this.num = num,
-      this.par = par,
-      this.yardage = yardage,
-      this.wYardage = wYardage,
-      this.putts = 0,
-      this.pure = 0,
-      this.good = 0,
-      this.bad = 0,
-      this.totalShots = 0,
-      this.toPar = 0,
-      this.played = false,
-      this.gir = false,
-      this.gotPar = false,
-      this.gotBirdie = false,
-      this.gotBogey = false,
-      this.gotEagle = false,
-      this.gotOverBogey = false
-    }
-  
-    addPure(num:number): void {
-      this.pure = num;
-      this.totalShots += num;
-    }
-    
-    
-    addGood(num:number): void {
-      this.good = num;
-      this.totalShots += num;
-    }
-    
-    
-    addBad(num:number): void {
-      this.bad = num;
-      this.totalShots += num;
-    }
-    
-    
-    addPutt(num:number): void {
-      this.putts = num;
-      this.totalShots += num;
-    }
-    
-    
-    
-    
-    greenInRegs(): void {
-      this.gir = (this.totalShots - this.putts) <= (this.par - 2);
-    }
-  
-    updateToPar(): void {
-      
-      this.toPar = this.totalShots > 0 ? (this.totalShots - this.par) : 0;
+    redYardage: number;
 
-      switch (this.toPar) {
-        case -2:
-          this.gotEagle = true
-        case -1:
-          this.gotBirdie = true
-          break;
-        case 0:
-          this.gotPar = true
-          break;
-        case 1:
-          this.gotBogey = true
-          break;
-        default:
-          this.gotOverBogey = true
-          break;
-      }
-      
+    constructor(num:number,color:string,par:number,yardage:number, redYardage:number) {
+      this.num = num;
+      this.color = color;
+      this.par = par;
+      this.yardage = yardage;
+      this.redYardage = redYardage;
     }
-
-    updateHole(pure:number,good:number,bad:number, putts:number): void {
-      this.addPure(pure);
-      this.addGood(good);
-      this.addBad(bad);
-      this.addPutt(putts);
-      this.played = true;
-      this.greenInRegs();
-      this.updateToPar();
-    }
-
-    
-    // subPure(): void {
-      //   if (this.pure > 0){
-        //     this.pure--;
-      //     this.totalShots--;
-      //   }
-      // }
-     // subGood(): void {
-      //   if (this.good > 0){
-      //     this.good--;
-      //     this.totalShots--;
-      //   }
-      // }
-      // subBad(): void {
-      //   if (this.bad > 0){
-      //     this.bad--;
-      //     this.totalShots--;
-      //   }
-      // }
-      // subPutt(): void {
-      //   if (this.putts > 0){
-      //     this.putts--;
-      //     this.totalShots--;
-      //   }
-      // }
     
   }
   
-  export class Course {
-    name: String;
-    holes: Hole[];
-    par: number;
-    strokes: number;
-    girGoal: number;
-    puttGoal: number;
-    gir: number;
-    putts: number;
-    holesPlayed: number;
-    toPar: number;
   
-    constructor() {
-      this.name = "Dominion Meadows"
-      this.holes = []
-      this.par = 72
-      this.strokes = 0
-      this.gir = 0
-      this.girGoal = 10
-      this.putts = 0
-      this.puttGoal = 36
-      this.holesPlayed = 0
-      this.toPar = 0
+
+  
+  export class Teebox {
+    color: string;
+    holes: {[num:number]: Hole} = {};
+    rounds: {[id:number]: Round} = {};
+    girGoal: number;
+    firGoal: number;
+    puttGoal: number;
+    strokeGoal: number;
+    par: number = 0;
+    yardage: number = 0;
+    avgStrokes: number = 0;
+    
+  
+    constructor(color:string, girGoal:number, puttGoal:number, firGoal:number, strokeGoal:number) {
+      this.color = color
+      this.girGoal = girGoal
+      this.firGoal = firGoal
+      this.puttGoal = puttGoal
+      this.strokeGoal = strokeGoal
     }
   
     addHole(hole: Hole): void {
-      this.holes.push(hole);
+      this.holes[hole.num] = hole;
     }
-  
-    // getTotalPar(): number {
-    //   return this.holes.reduce((total,hole)=> total += hole.par, 0)
-    // }
-    getTotalDist(): number {
-      return this.holes.reduce((total,hole)=> total += hole.yardage, 0)
-    }
-    getTotalWDist(): number {
-      return this.holes.reduce((total,hole)=> total += hole.wYardage, 0)
-    }
-    getTotalPure(): number {
-      return this.holes.reduce((total,hole)=> total += hole.pure, 0)
-    }
-    getTotalGood(): number {
-      return this.holes.reduce((total,hole)=> total += hole.good, 0)
-    }
-    getTotalBad(): number {
-      return this.holes.reduce((total,hole)=> total += hole.bad, 0)
+    addRound(round: Round): void {
+      this.rounds[round.id] = round;
     }
 
-
-    setToPar(): void {
-      const score = this.holes.reduce((total, hole) => total += hole.toPar, 0);
-      this.toPar = score
+    setGirGoal(num:number):void{
+      this.girGoal = num;
     }
 
+    setFirGoal(num:number):void{
+      this.firGoal = num;
+    }
 
-    setTotalShots(): void {
-      const total = this.holes.reduce((total,hole)=> total += hole.totalShots, 0)
-      this.strokes = total
+    setPuttGoal(num:number):void{
+      this.puttGoal = num;
     }
-    setTotalPutts(): void {
-      const totalPutts = this.holes.reduce((total,hole)=> total += hole.putts, 0)
-      this.putts = totalPutts
+
+    setStrokeGoal(num:number):void{
+      this.strokeGoal = num;
     }
-    setGIR(): void {
-      const gir = this.holes.reduce((total, hole) => total + (hole.gir ? 1 : 0), 0);
-      this.gir = gir 
+
+    updateParDist(): void {
+      const dist = Object.values(this.holes).reduce((total,hole)=> total += hole.yardage, 0);
+      const par = Object.values(this.holes).reduce((total,hole)=> total += hole.par,0);
+      this.par = par;
+      this.yardage = dist;
     }
-    setHolesPlayed(): void {
-      const numPlayed = this.holes.reduce((total, hole)=> total + (hole.played ? 1 : 0), 0);
-      this.holesPlayed = numPlayed;
-    }
-    courseUpdate(): void {
-      this.setTotalShots();
-      this.setTotalPutts();
-      this.setHolesPlayed();
-      this.setGIR();
-      this.setToPar();
+    updateAvgStrokes(): void {
+      const total = Object.values(this.rounds).reduce((total, round)=> total += round.totalStrokes,0);
+      this.avgStrokes = total / Object.keys(this.rounds).length;
     }
   }
 
-  export const createDominionMeadows = () => {
-    const par = [4,3,4,4,5,5,4,4,3,4,3,4,4,4,5,3,5,4]
-    const blackYardage = [267,187,531,314,462,573,391,360,216,392,260,445,394,426,552,206,605,424]
-    const redYardage = [210,125,286,263,370,415,299,260,101,320,187,306,250,279,381,95,462,286]
+  export class Course {
+    name: string;
+    teeboxes: { [color: string]: Teebox } = {};
 
-    const DominionMeadows = new Course();
-
-    for (let i = 1; i <= 18; i++){
-      const hole = new Hole(i,par[i-1],blackYardage[i-1],redYardage[i-1]);
-      DominionMeadows.addHole(hole);
+    constructor(name: string) {
+        this.name = name;
     }
 
-    return DominionMeadows;
+    addTeebox(teebox: Teebox) {
+        this.teeboxes[teebox.color] = teebox;
+    }
+
+    getTeeboxByColor(color: string): Teebox{
+      return this.teeboxes[color]; 
+    }
+}
+
+  export const createNewCourseRound = (courseName:string,teeColor:string,girGoal:number,puttGoal:number,firGoal:number,strokeGoal:number): Course => {
+    
+    // if (courseName=='Dominion Meadows'){
+      const par = [4,3,4,4,5,5,4,4,3,4,3,4,4,4,5,3,5,4]
+      const blackYardage = [267,187,531,314,462,573,391,360,216,392,260,445,394,426,552,206,605,424]
+      const redYardage = [210,125,286,263,370,415,299,260,101,320,187,306,250,279,381,95,462,286]
+      ///////////////////////////////// Create Dominion Meadows //////////////////////////////////
+      const DominionMeadows = new Course(courseName);
+      ///////////////////////// Create Black Tee w/ goals and add holes /////////////////////////
+      const Tees = new Teebox(teeColor,girGoal,puttGoal,firGoal,strokeGoal)
+      for (let i = 1; i <= 18; i++){
+        const hole = new Hole(i,teeColor,par[i-1],blackYardage[i-1],redYardage[i-1]);
+        Tees.addHole(hole);
+      }
+      DominionMeadows.addTeebox(Tees)
+      //////////////////////////////////// Create New Round ////////////////////////////////////
+      const newRound = new Round();
+      const tee = DominionMeadows.getTeeboxByColor(teeColor);
+      tee?.addRound(newRound);
+      // console.log(DominionMeadows)
+      return DominionMeadows;
+
+    // }
   }
