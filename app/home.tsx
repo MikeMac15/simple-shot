@@ -3,10 +3,10 @@ import { useEffect, useState } from "react";
 import { TouchableOpacity, View, Text, TextInput, StyleSheet, Alert } from "react-native";
 
 export default function HomeScreen(){
-    const [gir, setGIR] = useState('')
-    const [fir, setFIR] = useState('')
-    const [strokes, setStrokes] = useState('')
-    const [putts, setPutts] = useState('')
+    const [gir, setGIR] = useState('7')
+    const [fir, setFIR] = useState('7')
+    const [strokes, setStrokes] = useState('75')
+    const [putts, setPutts] = useState('36')
 
     const [goodToGo, setGTG] = useState(false)
 
@@ -75,7 +75,7 @@ export default function HomeScreen(){
             }}>
                 {
                     goodToGo ?
-                    <Link replace href={{pathname:'/ShotTracker', params:{courseID:1,courseName:'Dominion Meadows',teeColor:'Black',girGoal:gir, puttGoal:putts, firGoal:fir, strokeGoal:strokes}}}>
+                    <Link push href={{pathname:'/ShotTracker', params:{courseName:'Dominion Meadows',teeColor:'Black',girGoal:gir, puttGoal:putts, firGoal:fir, strokeGoal:strokes}}}>
                     Play Dominion Meadows
                 </Link>
                 : <Text>Play Dominion Meadows</Text>

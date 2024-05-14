@@ -1,39 +1,43 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
-export const setUpCourse = async(course: Course) => {
-  try {
-    const courseStringify = JSON.stringify(course)
-    await AsyncStorage.setItem('course', courseStringify)
-  } catch(e) {
-            console.error(e)
-        }
-}
+// export const setUpCourse = async(course: Course) => {
+  //   try {
+  //     const courseStringify = JSON.stringify(course)
+  //     await AsyncStorage.setItem('course', courseStringify)
+  //   } catch(e) {
+  //             console.error(e)
+  //         }
+  // }
 
-export const updateCourseData = async(course: Course) => {
-  try {
-    const courseStringify = JSON.stringify(course)
-    await AsyncStorage.setItem('course', courseStringify)
-  } catch (e) {
-    console.error(e)
-  }
-}
+  // export const updateCourseData = async(course: Course) => {
+  //   try {
+  //     const courseStringify = JSON.stringify(course)
+  //     await AsyncStorage.setItem(course.name, courseStringify)
+  //   } catch (e) {
+  //     console.error(e)
+  //   }
+  // }
 
-export const getScoreCardData = async() => {
-  try {
-    const jsonData = await AsyncStorage.getItem('course')
-    return jsonData != null ? JSON.parse(jsonData) : null
-  } catch(e){
-    console.error(e)
-  }
-}
+  // export const getScoreCardData = async(courseName: string) => {
+  //   try {
+  //     const jsonData = await AsyncStorage.getItem(courseName);
+  //     if (jsonData) {
+  //       const courseData: Course = JSON.parse(jsonData);
+  //       const course = new Course(courseData.name, courseData.teeboxes);
+  //       return course;
+  //     }
+  //   } catch(e){
+  //     console.error(e)
+  //   }
+  // }
 
-export const resetScorecard = async () => {
-  try {
-    await AsyncStorage.removeItem('course')
-  } catch(e) {console.error(e)}
-  console.log('removed.')
-}
+  // export const resetScorecard = async () => {
+  //   try {
+  //     await AsyncStorage.removeItem('course')
+  //   } catch(e) {console.error(e)}
+  //   console.log('removed.')
+  // }
 
 
 /////////////////////////////////////////////////// CLASSES ///////////////////////////////////////////////////
@@ -41,7 +45,7 @@ export const resetScorecard = async () => {
 
 //???????///////?????????///// HARD CODE ROUND.ID FIX IT //////????????//////////????????/////???????/////????
 export class Round {
-  id : number = 1;
+  id : number;
   holesPlayed : number = 0;
   holes : {[num:number]:HoleStats} = {};
   putts : number = 0; // sum of this.holes.hole.putts
@@ -56,6 +60,9 @@ export class Round {
   FIRs : number = 0; // count() of this.holes.hole.fir == true
   totalStrokes : number = 0;
 
+  constructor(id:number) {
+    this.id = id
+  }
 
   addRoundHole(hole: Hole, gir: boolean, putts: number, pure: number, good: number, bad: number, fir?: boolean) {
     const roundHole = new HoleStats(hole, putts, pure, good, bad, gir, fir);
@@ -194,10 +201,11 @@ export class Hole {
 
   export class Course {
     name: string;
-    teeboxes: { [color: string]: Teebox } = {};
+    teeboxes: { [color: string]: Teebox };
 
-    constructor(name: string) {
+    constructor(name: string, teeboxes: { [color: string]: Teebox } = {}) {
         this.name = name;
+        this.teeboxes = teeboxes;
     }
 
     addTeebox(teebox: Teebox) {
@@ -213,8 +221,10 @@ export class Hole {
     
     // if (courseName=='Dominion Meadows'){
       const par = [4,3,4,4,5,5,4,4,3,4,3,4,4,4,5,3,5,4]
-      const blackYardage = [267,187,531,314,462,573,391,360,216,392,260,445,394,426,552,206,605,424]
-      const redYardage = [210,125,286,263,370,415,299,260,101,320,187,306,250,279,381,95,462,286]
+      // const blackYardage = [267,187,531,314,462,573,391,360,216,392,260,445,394,426,552,206,605,424]
+      // const redYardage = [210,125,286,263,370,415,299,260,101,320,187,306,250,279,381,95,462,286]
+      const blackYardage = [375,171,155,326,130,398,391,275,452,301,364,100,503,475,146,366,181,454]
+      const redYardage =   [300,145,108,284,114,341,296,220,395,286,325,83,416,383,135,326,138,373]
       ///////////////////////////////// Create Dominion Meadows //////////////////////////////////
       const DominionMeadows = new Course(courseName);
       ///////////////////////// Create Black Tee w/ goals and add holes /////////////////////////
@@ -224,10 +234,6 @@ export class Hole {
         Tees.addHole(hole);
       }
       DominionMeadows.addTeebox(Tees)
-      //////////////////////////////////// Create New Round ////////////////////////////////////
-      const newRound = new Round();
-      const tee = DominionMeadows.getTeeboxByColor(teeColor);
-      tee?.addRound(newRound);
       // console.log(DominionMeadows)
       return DominionMeadows;
 
